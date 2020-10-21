@@ -37,8 +37,14 @@ int passfunction(char* arr, struct sockaddr_in* plylist, int s){
 
 	switch(d){
 		case C_TRANSFORM:
+			//DEBUG TEST TRANSFORM
+			Vector3 onevec(1,1,1);
+			Vector3 zerovec(0,0,0);
+			Transform newtrans(zerovec, zerovec, onevec);
+
 			puts("C_TRANSFORM");
-			sprintf(buf, "%d", C_TRANSFORM);
+			sprintf(buf, "%d%d", C_TRANSFORM, getencodedtransform(newtrans));
+			printf("\nEncoded string:\n%s\n", buf);
 			broadcast(plylist, s, buf, sizeof(buf));
 			break;
 		default:
@@ -48,6 +54,13 @@ int passfunction(char* arr, struct sockaddr_in* plylist, int s){
 	return 0;
 }
 
+char* getencodedtransform(Transform transform){
+
+	char encodebuffer[9];
+	sprintf(encodebuffer, "%d%d%d%d%d%d%d%d%d", transform.position.x, transform.position.y, transform.position.z, transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.scale.x, transform.scale.y, transform.scale.z);
+	return encodebuffer;
+}
+
 int main(void)
 {
 	struct sockaddr_in si_me, si_other;
@@ -55,8 +68,6 @@ int main(void)
 	int s, i, slen = sizeof(si_other) , recv_len;
 	char buf[BUFLEN];
 
-	//Vector3 newvec(1,1,1);
-	//Transform newtrans(newvec, newvec, newvec);
 	//create a UDP socket
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
