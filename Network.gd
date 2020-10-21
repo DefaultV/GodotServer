@@ -5,19 +5,25 @@ extends Spatial
 # var a = 2
 # var b = "text"
 
-var txt_server = "127.0.0.1" 
+var txt_server = "192.168.1.13" 
 var port = 8888
 var clientport = 8887
 var socketUDP = PacketPeerUDP.new()
 var socketUDPlisten = PacketPeerUDP.new()
 
+enum {
+	C_TRANSFORM = 0
+}
+
 func _ready():
 	start_client();
 
 func _process(delta):
-	#print(socketUDP.get_available_packet_count())
 	if socketUDP.get_available_packet_count() > 0:
-		print(socketUDP.get_packet().get_string_from_ascii());
+		var rec = socketUDP.get_packet().get_string_from_ascii();
+		print(rec)
+		if int(rec) == C_TRANSFORM:
+			print("Change transform");
 
 func start_client():
 
