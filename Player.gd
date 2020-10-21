@@ -8,8 +8,10 @@ export var mouse_sensitivity = Vector2(0.002, 0.003);
 var velocity = Vector3.ZERO
 var anchor;
 var camera;
+var network;
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	network = get_node("/root/World/Network");
 	anchor = get_node("Camera_anchor");
 	camera = get_node("Camera_anchor/Camera");
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED);
@@ -37,6 +39,10 @@ func get_input(delta):
 	velocity.y = vy
 
 func _input(event):
+	if event is InputEventMouseButton:
+		if event.pressed:
+			print("sending...")
+			network.send("0Hello from Godot!");
 	if event is InputEventMouseMotion:
 		anchor.rotate_y(-event.get_relative().x * mouse_sensitivity.x)
 		var camrotatey = -event.get_relative().y * mouse_sensitivity.y;
