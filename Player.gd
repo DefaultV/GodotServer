@@ -29,7 +29,7 @@ func get_input(delta):
 	var vy = velocity.y
 	velocity = Vector3.ZERO
 	if Input.is_action_just_pressed("p"):
-		network.send("0")
+		network.send("2000000000000")
 	if Input.is_action_pressed("w"):
 		velocity += -anchor.transform.basis.z * speed;
 	if Input.is_action_pressed("s"):
@@ -43,8 +43,8 @@ func get_input(delta):
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.pressed:
-			print("sending...")
-			network.send("2");
+			print("sending nothing...")
+			#network.send("2");
 	if event is InputEventMouseMotion:
 		anchor.rotate_y(-event.get_relative().x * mouse_sensitivity.x)
 		var camrotatey = -event.get_relative().y * mouse_sensitivity.y;

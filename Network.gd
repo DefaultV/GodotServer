@@ -12,7 +12,8 @@ var socketUDP = PacketPeerUDP.new()
 var socketUDPlisten = PacketPeerUDP.new()
 
 enum {
-	C_TRANSFORM = 0
+	C_SPAWN = 0,
+	C_TRANSFORM
 }
 
 func _ready():
@@ -22,8 +23,46 @@ func _process(delta):
 	if socketUDP.get_available_packet_count() > 0:
 		var rec = socketUDP.get_packet().get_string_from_ascii();
 		print(rec)
-		if int(rec) == C_TRANSFORM:
+		if int(rec[0]) == C_SPAWN:
+			print("spawning entity..")
+			spawn_entity(int(rec[2]), rec)
+		if int(rec[0]) == C_TRANSFORM:
 			print("Change transform");
+			change_entity(int(rec[2]), rec)
+
+var CUBE = preload("res://Cube.tscn")
+
+func spawn_entity(id, trans):
+	var entity = get_node("/root/World/Entities");
+	if id == 1:
+		#0 2 456789012
+		#0:1:000111222
+		print(trans)
+		var cube = CUBE.instance()
+		var vec:Vector3 = Vector3(int(trans[4]), int(trans[5]), int(trans[6]))
+		var rot:Vector3 = Vector3(int(trans[7]), int(trans[8]), int(trans[9]))
+		cube.translation = vec;
+		cube.rotation = rot
+		#cube.rotate(int(trans[7]), int(trans[8]), int(trans[9]))
+		cube.scale.x = int(trans[10])
+		cube.scale.y = int(trans[11])
+		cube.scale.z = int(trans[12])
+		entity.add_child(cube)
+
+func change_entity(id, trans):
+	var entity = get_node("/root/World/Entities");
+	for child in entity.get_children():
+		if child.ID == id:
+			#0 2 456789012
+			#0:1:000111222
+			print(trans)
+			var vec:Vector3 = Vector3(int(trans[4]), int(trans[5]), int(trans[6]))
+			var rot:Vector3 = Vector3(int(trans[7]), int(trans[8]), int(trans[9]))
+			child.translation = vec;
+			child.rotation = rot
+			child.scale.x = int(trans[10])
+			child.scale.y = int(trans[11])
+			child.scale.z = int(trans[12])
 
 func start_client():
 
@@ -33,7 +72,7 @@ func start_client():
 	#	print("error connecting to host")
 	if (socketUDP.listen(clientport, "*", 512) != OK):
 		print("Error setting destination address")
-	send("0")
+	send("0000000000000")
 	#if (socketUDPlisten.wait() == OK):
 	#	print("Return!")
 
@@ -44,4 +83,5 @@ func send(arg):
 				socketUDP.put_packet(pac)
 
 func _exit_tree():
+	send("1");
 	socketUDP.close()

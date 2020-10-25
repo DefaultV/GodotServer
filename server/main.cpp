@@ -8,13 +8,15 @@ int main(void)
 {	Server server;
 	struct sockaddr_in si_me, si_other;
 
-	int s, i, slen = sizeof(si_other) , recv_len, players = 0;
+	int s, recv_len, players = 0;
+	socklen_t slen = sizeof(si_other)/2; //HACKFIX TODO
 	char buf[BUFLEN];
 
 	//create a UDP socket
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
-		server.die("socket");
+		//server.die("socket");
+		printf("Socket failed");
 	}
 
 	// zero out the structure
@@ -28,7 +30,8 @@ int main(void)
 	//bind socket to port
 	if( bind(s , (struct sockaddr*)&si_me, sizeof(si_me) ) == -1)
 	{
-		server.die("bind");
+		//server.die("bind");
+		printf("Bind failed");
 	}
 
 	Player playerlist[MAXPLAYERS];
@@ -40,7 +43,8 @@ int main(void)
 		//try to receive some data, this is a blocking call
 		if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1)
 		{
-			server.die("recvfrom()");
+			//server.die("recvfrom()");
+			printf("Recieve failed");
 		}
 		//print details of the client/peer and the data received
 		printf("\nReceived packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
