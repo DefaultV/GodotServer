@@ -5,8 +5,8 @@ struct Vector3{
 	int x, y, z;
 	Vector3(int w, int r, int q){
 		x = w;
-		r = y;
-		q = z;
+		y = r;
+		z = q;
 	}
 	Vector3(){}
 };

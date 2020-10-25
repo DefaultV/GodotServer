@@ -5,7 +5,7 @@ extends Spatial
 # var a = 2
 # var b = "text"
 
-var txt_server = "192.168.1.13" 
+var txt_server = "127.0.0.1" 
 var port = 8888
 var clientport = 8887
 var socketUDP = PacketPeerUDP.new()
@@ -33,7 +33,7 @@ func start_client():
 	#	print("error connecting to host")
 	if (socketUDP.listen(clientport, "*", 512) != OK):
 		print("Error setting destination address")
-	
+	send("0")
 	#if (socketUDPlisten.wait() == OK):
 	#	print("Return!")
 
