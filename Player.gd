@@ -15,6 +15,7 @@ func _ready():
 	anchor = get_node("Camera_anchor");
 	camera = get_node("Camera_anchor/Camera");
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED);
+	updateNetwork()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -24,12 +25,14 @@ func _physics_process(delta):
 		apply_central_impulse(velocity.normalized() * max_velocity);
 	else:
 		apply_central_impulse(velocity);
+	updateNetwork()
+
+func updateNetwork():
+	network.send("2")
 
 func get_input(delta):
 	var vy = velocity.y
 	velocity = Vector3.ZERO
-	if Input.is_action_just_pressed("p"):
-		network.send("2000000000000")
 	if Input.is_action_pressed("w"):
 		velocity += -anchor.transform.basis.z * speed;
 	if Input.is_action_pressed("s"):

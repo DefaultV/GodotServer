@@ -14,5 +14,5 @@ class Server{
 		int broadcast(Player*, int*, int, char*, size_t);
 		void getencodedtransform(Transform*, char*, int*, int*);
 		int passfunction(char*, Player*, int*, Player*, int);
-
+		Vector3 grabPositionFromDB(int*);
 };

@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "sqlite3.h"
 
 enum func_call{
 	C_LOGIN,
@@ -28,13 +29,8 @@ int Server::broadcast(Player* plylist, int* players, int s, char* buf, size_t bu
 }
 
 void Server::getencodedtransform(Transform* transform, char* outstr, int* cmd, int* id){
-	sprintf(outstr, "%d:%d:%d%d%d%d%d%d%d%d%d", *cmd, *id, transform->position.x, transform->position.y, transform->position.z, transform->rotation.x, transform->rotation.y, transform->rotation.z, transform->scale.x, transform->scale.y, transform->scale.z);
+	sprintf(outstr, "%d:%d:%.2f%.2f%.2f%.2f%.2f%.2f%.2f%.2f%.2f", *cmd, *id, transform->position.x, transform->position.y, transform->position.z, transform->rotation.x, transform->rotation.y, transform->rotation.z, transform->scale.x, transform->scale.y, transform->scale.z);
 }
-
-//DEBUG TEST TRANSFORM MAKE SQL DB TODO
-Vector3 onevec(1,1,1);
-Vector3 zerovec(0,0,0);
-Transform newtrans(zerovec, zerovec, onevec);
 
 int Server::passfunction(char* buf, Player* plylist, int* players, Player* client, int s){
 	int d = (int)buf[0]-48;
@@ -42,6 +38,7 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 	char newbuf[512];
 	int id = 1;
 	// --------------
+	Transform a_trans;
 	if (d == C_LOGIN){
 		puts("LOGIN");
 		plylist[*players] = *client;
@@ -49,11 +46,13 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 		*players += 1;
 		d = 0;
 		printf("\nNumer of players: %d\n", *players);
-		getencodedtransform(&newtrans, newbuf, &d, &id);
-		broadcast(plylist, players, s, newbuf, sizeof(newbuf));
+		//getencodedtransform(&a_trans, newbuf, &d, &id);
+		//broadcast(plylist, players, s, newbuf, sizeof(newbuf));
 	}
 	if (d == C_LOGOUT){
 
+		if (*players == 0) //make sure we don't have negative players, prettify
+			return 1;
 		puts("LOGOUT"); //TODO
 		//plylist[*players] = null;
 		*players -= 1;
@@ -61,10 +60,9 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 	}
 	if (d == C_TRANSFORM){
 			puts("C_TRANSFORM");
-			d = 1;
-			Vector3 newvec(0,2,0);
-			newtrans.position = newvec;
-			getencodedtransform(&newtrans, newbuf, &d, &id);
+			//a_trans.setScale(0.5, 0.5, 0.5);
+			a_trans.setPosition(grabPositionFromDB(&d));
+			getencodedtransform(&a_trans, newbuf, &d, &id);
 			broadcast(plylist, players, s, newbuf, sizeof(newbuf));
 	}
 	//DEBUG PURPOSES
@@ -72,3 +70,57 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 	return 0;
 }
 
+Vector3 sql_position;
+void setSQLPosition(float x, float y, float z){
+	sql_position.x = x;
+	sql_position.y = y;
+	sql_position.z = z;
+}
+
+int sql_callback(void* data, int argc, char** argv, char** azColName){
+
+	int i;
+	float x, y, z;
+	/*for (i = 0; i < argc; i++){
+
+		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+		if (strcmp(azColName[i], "POSX") == 1){
+			x = (float)strtod(argv[i], NULL);
+			printf("Yeaposx %f\n", x);
+		}
+		if (strcmp(azColName[i], "POSY") == 1){
+			y = (float)strtod(argv[i], NULL);
+			printf("Yeaposy %f\n", y);
+		}
+		if (strcmp(azColName[i], "POSZ") == 1){
+			z = (float)strtod(argv[i], NULL);
+			printf("Yeaposz %f\n", z);
+		}
+	}*/
+	x = (float)strtod(argv[0], NULL);
+	y = (float)strtod(argv[1], NULL);
+	z = (float)strtod(argv[2], NULL);
+	setSQLPosition(x, y, z);
+	return 0;
+}
+
+
+Vector3 Server::grabPositionFromDB(int* id){
+
+	sqlite3* db;
+	char* zErrMsg;
+	char sql[50];
+	const char* data = "Callback";
+	int rc;
+
+	rc = sqlite3_open("db/transforms.db", &db);
+
+	if (rc)
+		printf("%s", sqlite3_errmsg(db));
+
+	sprintf(sql, "SELECT * FROM TRANSFORMS WHERE ID == 1");
+	rc = sqlite3_exec(db, sql, sql_callback, (void*)data, &zErrMsg);
+
+	sqlite3_close(db);
+	return sql_position;
+}

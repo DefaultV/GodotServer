@@ -10,4 +10,8 @@ class Transform{
 
 		Transform(Vector3 pos, Vector3 rot, Vector3 sca);
 		Transform();
+		void setPosition(float, float, float);
+		void setPosition(Vector3);
+		void setRotation(float, float, float);
+		void setScale(float, float, float);
 };

@@ -13,18 +13,23 @@ var socketUDPlisten = PacketPeerUDP.new()
 
 enum {
 	C_SPAWN = 0,
-	C_TRANSFORM
+	C_TRANSFORM = 2
 }
 
 func _ready():
 	start_client();
+	
+var DEBUG_REC = false;
 
 func _process(delta):
 	if socketUDP.get_available_packet_count() > 0:
 		var rec = socketUDP.get_packet().get_string_from_ascii();
-		print(rec)
+		if not DEBUG_REC:
+			DEBUG_REC = true;
+			print("Receiving datastream")
+		#print(rec)
 		if int(rec[0]) == C_SPAWN:
-			print("spawning entity..")
+			#print("spawning entity..")
 			spawn_entity(int(rec[2]), rec)
 		if int(rec[0]) == C_TRANSFORM:
 			print("Change transform");
@@ -37,16 +42,15 @@ func spawn_entity(id, trans):
 	if id == 1:
 		#0 2 456789012
 		#0:1:000111222
-		print(trans)
+		#print("Spawning Cube " + trans.substr(4, 4))
 		var cube = CUBE.instance()
-		var vec:Vector3 = Vector3(int(trans[4]), int(trans[5]), int(trans[6]))
-		var rot:Vector3 = Vector3(int(trans[7]), int(trans[8]), int(trans[9]))
+		var vec:Vector3 = Vector3(float(trans.substr(4, 4)), float(trans.substr(8, 4)), float(trans.substr(12, 4)))
+		var rot:Vector3 = Vector3(float(trans.substr(16, 4)), float(trans.substr(20, 4)), float(trans.substr(24, 4)))
 		cube.translation = vec;
 		cube.rotation = rot
-		#cube.rotate(int(trans[7]), int(trans[8]), int(trans[9]))
-		cube.scale.x = int(trans[10])
-		cube.scale.y = int(trans[11])
-		cube.scale.z = int(trans[12])
+		cube.scale.x = float(trans.substr(28, 4))
+		cube.scale.y = float(trans.substr(32, 4))
+		cube.scale.z = float(trans.substr(36, 4))
 		entity.add_child(cube)
 
 func change_entity(id, trans):
@@ -55,14 +59,13 @@ func change_entity(id, trans):
 		if child.ID == id:
 			#0 2 456789012
 			#0:1:000111222
-			print(trans)
-			var vec:Vector3 = Vector3(int(trans[4]), int(trans[5]), int(trans[6]))
-			var rot:Vector3 = Vector3(int(trans[7]), int(trans[8]), int(trans[9]))
+			var vec:Vector3 = Vector3(float(trans.substr(4, 4)), float(trans.substr(8, 4)), float(trans.substr(12, 4)))
+			var rot:Vector3 = Vector3(float(trans.substr(16, 4)), float(trans.substr(20, 4)), float(trans.substr(24, 4)))
 			child.translation = vec;
 			child.rotation = rot
-			child.scale.x = int(trans[10])
-			child.scale.y = int(trans[11])
-			child.scale.z = int(trans[12])
+			child.scale.x = float(trans.substr(28, 4))
+			child.scale.y = float(trans.substr(32, 4))
+			child.scale.z = float(trans.substr(36, 4))
 
 func start_client():
 
@@ -72,7 +75,7 @@ func start_client():
 	#	print("error connecting to host")
 	if (socketUDP.listen(clientport, "*", 512) != OK):
 		print("Error setting destination address")
-	send("0000000000000")
+	send("0")
 	#if (socketUDPlisten.wait() == OK):
 	#	print("Return!")
 
