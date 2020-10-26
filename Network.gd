@@ -32,7 +32,8 @@ func _process(delta):
 			#print("spawning entity..")
 			spawn_entity(int(rec[2]), rec)
 		if int(rec[0]) == C_TRANSFORM:
-			print("Change transform");
+			#print("Change transform");
+			print(rec);
 			change_entity(int(rec[2]), rec)
 
 var CUBE = preload("res://Cube.tscn")

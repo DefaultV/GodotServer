@@ -18,7 +18,7 @@ int Server::broadcast(Player* plylist, int* players, int s, char* buf, size_t bu
 
 	for(int i = 0; i <= *players-1; i++){
 		printf("\n%lu player(s)", sizeof(*plylist)/sizeof(plylist[0]));
-		printf("\nSending -%s- to player on port: %d", buf ,plylist[i].socket.sin_port);
+		printf("\nSending ||%s|| to player on port: %d", buf ,plylist[i].socket.sin_port);
 		socklen_t len = sizeof(plylist[i].socket);
 		if (sendto(s, buf, buflen, 0, (struct sockaddr*) &plylist[i].socket, len) == -1){
 			//die("sendto()");
@@ -46,8 +46,9 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 		*players += 1;
 		d = 0;
 		printf("\nNumer of players: %d\n", *players);
-		//getencodedtransform(&a_trans, newbuf, &d, &id);
-		//broadcast(plylist, players, s, newbuf, sizeof(newbuf));
+		a_trans.setPosition(grabPositionInDB(&id));
+		getencodedtransform(&a_trans, newbuf, &d, &id);
+		broadcast(plylist, players, s, newbuf, sizeof(newbuf));
 	}
 	if (d == C_LOGOUT){
 
@@ -61,7 +62,7 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 	if (d == C_TRANSFORM){
 			puts("C_TRANSFORM");
 			//a_trans.setScale(0.5, 0.5, 0.5);
-			a_trans.setPosition(grabPositionFromDB(&d));
+			a_trans.setPosition(grabPositionInDB(&id));
 			getencodedtransform(&a_trans, newbuf, &d, &id);
 			broadcast(plylist, players, s, newbuf, sizeof(newbuf));
 	}
@@ -77,9 +78,9 @@ void setSQLPosition(float x, float y, float z){
 	sql_position.z = z;
 }
 
-int sql_callback(void* data, int argc, char** argv, char** azColName){
+int sql_callback_position(void* data, int argc, char** argv, char** azColName){
 
-	int i;
+	//int i;
 	float x, y, z;
 	/*for (i = 0; i < argc; i++){
 
@@ -97,6 +98,7 @@ int sql_callback(void* data, int argc, char** argv, char** azColName){
 			printf("Yeaposz %f\n", z);
 		}
 	}*/
+	printf("\nfrom db: %s\n", argv[1]);
 	x = (float)strtod(argv[0], NULL);
 	y = (float)strtod(argv[1], NULL);
 	z = (float)strtod(argv[2], NULL);
@@ -105,7 +107,7 @@ int sql_callback(void* data, int argc, char** argv, char** azColName){
 }
 
 
-Vector3 Server::grabPositionFromDB(int* id){
+Vector3 Server::grabPositionInDB(int* id){
 
 	sqlite3* db;
 	char* zErrMsg;
@@ -118,9 +120,28 @@ Vector3 Server::grabPositionFromDB(int* id){
 	if (rc)
 		printf("%s", sqlite3_errmsg(db));
 
-	sprintf(sql, "SELECT * FROM TRANSFORMS WHERE ID == 1");
-	rc = sqlite3_exec(db, sql, sql_callback, (void*)data, &zErrMsg);
-
+	sprintf(sql, "SELECT * FROM TRANSFORMS WHERE ID == %d", *id);
+	rc = sqlite3_exec(db, sql, sql_callback_position, (void*)data, &zErrMsg);
+	printf("%s", sql);
 	sqlite3_close(db);
 	return sql_position;
+}
+
+void Server::setPositionInDB(int* id, Vector3 vec){
+
+	sqlite3* db;
+	char* zErrMsg;
+	char sql[1024];
+	const char* data = "Callback";
+	int rc;
+
+	rc = sqlite3_open("db/transforms.db", &db);
+
+	if (rc)
+		printf("%s", sqlite3_errmsg(db));
+
+	sprintf(sql, "UPDATE TRANSFORMS SET POSX = %f, POSY = %f, POSZ = %f WHERE ID == %d", vec.x, vec.y, vec.z, *id);
+	rc = sqlite3_exec(db, sql, NULL, (void*)data, &zErrMsg);
+
+	sqlite3_close(db);
 }

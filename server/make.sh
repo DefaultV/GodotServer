@@ -1,1 +1,1 @@
-g++ *.cpp -l sqlite3 -o server
+g++ *.cpp -l sqlite3 -o server -Wall
