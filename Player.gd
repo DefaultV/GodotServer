@@ -17,15 +17,18 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED);
 	updateNetwork()
 
-
+var updaterate = 0.0;
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+	updaterate += delta;
 	get_input(delta)
 	if (velocity.length() >= max_velocity):
 		apply_central_impulse(velocity.normalized() * max_velocity);
 	else:
 		apply_central_impulse(velocity);
-	updateNetwork()
+	if (updaterate >= 0.1):
+		updateNetwork()
+		updaterate = 0;
 
 func updateNetwork():
 	network.send("2")

@@ -80,24 +80,8 @@ void setSQLPosition(float x, float y, float z){
 
 int sql_callback_position(void* data, int argc, char** argv, char** azColName){
 
-	//int i;
 	float x, y, z;
-	/*for (i = 0; i < argc; i++){
 
-		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-		if (strcmp(azColName[i], "POSX") == 1){
-			x = (float)strtod(argv[i], NULL);
-			printf("Yeaposx %f\n", x);
-		}
-		if (strcmp(azColName[i], "POSY") == 1){
-			y = (float)strtod(argv[i], NULL);
-			printf("Yeaposy %f\n", y);
-		}
-		if (strcmp(azColName[i], "POSZ") == 1){
-			z = (float)strtod(argv[i], NULL);
-			printf("Yeaposz %f\n", z);
-		}
-	}*/
 	printf("\nfrom db: %s\n", argv[1]);
 	x = (float)strtod(argv[0], NULL);
 	y = (float)strtod(argv[1], NULL);

@@ -1,8 +1,28 @@
 #include "Server.h"
+#include <pthread.h>
+#include <unistd.h>
 
 #define BUFLEN 512	//Max length of buffer
 #define PORT 8888	//The port on which to listen for incoming data
 #define MAXPLAYERS 8
+
+void* creatureUpdate(void* serv){
+
+	int id = 1;
+	float inc = 0;
+	Server* server;
+	server = (Server*) serv;
+
+	puts("Starting creature update thread");
+	while (1){
+		inc+= 0.01;
+		puts("Updating position");
+		server->setPositionInDB(&id, Vector3(0, 0+inc, -2));
+		usleep(50000);
+	}
+	puts("Exiting creature update thread");
+	pthread_exit(NULL);
+}
 
 int main(void)
 {	Server server;
@@ -36,8 +56,10 @@ int main(void)
 
 	Player playerlist[MAXPLAYERS];
 	//keep listening for data
-	int id = 1;
-	float inc = 0;
+
+	//Multithread
+	pthread_t creatureThread;
+	pthread_create(&creatureThread, NULL, creatureUpdate, (void*)&server);
 	while(1)
 	{
 		fflush(stdout);
@@ -55,9 +77,6 @@ int main(void)
 		player.socket = si_other;
 		server.passfunction(buf, playerlist, &players, &player, s);
 
-		inc+= 0.01;
-		printf("\nInc: %f\n", inc);
-		server.setPositionInDB(&id, Vector3(0, 0+inc, -2));
 		//now reply the client with the same data
 		//strcpy(buf, "Hello from C++!");
 		/*if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1)

@@ -1,1 +1,1 @@
-g++ *.cpp -l sqlite3 -o server -Wall
+g++ *.cpp -lpthread -l sqlite3 -o server -Wall
