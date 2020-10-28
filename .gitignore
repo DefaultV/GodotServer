@@ -4,3 +4,4 @@
 todo
 server/todo
 server/server
+server/db/*
