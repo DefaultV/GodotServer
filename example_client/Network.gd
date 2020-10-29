@@ -30,17 +30,20 @@ func _process(delta):
 		#print(rec)
 		if int(rec[0]) == C_SPAWN:
 			#print("spawning entity..")
+			print(rec[2])
 			spawn_entity(int(rec[2]), rec)
 		if int(rec[0]) == C_TRANSFORM:
 			#print("Change transform");
-			print(rec);
+			#print(rec);
 			change_entity(int(rec[2]), rec)
 
 var CUBE = preload("res://Cube.tscn")
 
 func spawn_entity(id, trans):
 	var entity = get_node("/root/World/Entities");
+	print("spawn - id: " + String(id));
 	if id == 1:
+		print("spawning cube")
 		#0 2 456789012
 		#0:1:000111222
 		#print("Spawning Cube " + trans.substr(4, 4))

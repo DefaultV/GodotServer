@@ -71,7 +71,6 @@ int Server::passfunction(char* buf, Player* plylist, int* players, Player* clien
 
 			plylist[*players] = *client;
 			plylist[*players].id = *players;
-			id++;
 			*players += 1;
 		}
 		d = 0;

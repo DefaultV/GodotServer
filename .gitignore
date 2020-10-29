@@ -6,3 +6,6 @@ server/todo
 server/server
 server/db/*
 server/db/transforms.db
+transforms.db
+db/transforms.db
+/server/db/transforms.db
