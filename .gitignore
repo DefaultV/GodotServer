@@ -5,3 +5,4 @@ todo
 server/todo
 server/server
 server/db/*
+server/db/transforms.db
