@@ -9,3 +9,6 @@ server/db/transforms.db
 transforms.db
 db/transforms.db
 /server/db/transforms.db
+example_client/*
+!example_client/Network.gd
+!example_client/ID.gd
